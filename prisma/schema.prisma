@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id              Int        @id @default(autoincrement())
+  name            String     @unique
+  parentId        Int?
+  parentCategory  Category?  @relation("ParentCategory", fields: [parentId], references: [id])
+  childCategories Category[] @relation("ParentCategory")
+  features        Feature[]
+  banner          String
+}
+
+model User {
+  id          Int    @id @default(autoincrement())
+  firstName   String
+  lastName    String
+  password String
+  email       String @unique
+  phoneNumber String @unique
+  carts       Cart[]
+}
+
+model Article {
+  id              Int              @id @default(autoincrement())
+  name            String
+  model           String
+  producer        Producer         @relation(fields: [producerId], references: [id])
+  cartItem        CartItem[]
+  producerId      Int
+  articleFeatures ArticleFeature[]
+}
+
+model Producer {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  articles Article[]
+}
+
+model Price {
+  id      Int      @id @default(autoincrement())
+  addedAt DateTime @default(now())
+}
+
+model Feature {
+  id              Int              @id @default(autoincrement())
+  name            String
+  categoryId      Int
+  category        Category         @relation(fields: [categoryId], references: [id])
+  articleFeatures ArticleFeature[]
+}
+
+model CartItem {
+  id        Int     @id @default(autoincrement())
+  quantity  Int
+  articleId Int
+  article   Article @relation(fields: [articleId], references: [id])
+}
+
+model Cart {
+  id     Int        @id @default(autoincrement())
+  userId Int
+  user   User       @relation(fields: [userId], references: [id])
+  status CartStatus
+}
+
+enum CartStatus {
+  ONGOING
+  PROCESSING
+  ABORTED
+}
+
+model ArticleFeature {
+  id        Int     @id @default(autoincrement())
+  articleId Int
+  featureId Int
+  value     String
+  article   Article @relation(fields: [articleId], references: [id])
+  feature   Feature @relation(fields: [featureId], references: [id])
+}
