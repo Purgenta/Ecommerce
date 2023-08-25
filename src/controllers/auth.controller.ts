@@ -6,11 +6,13 @@ import { Res } from '@nestjs/common/decorators';
 import { BadRequestException, HttpException } from '@nestjs/common/exceptions';
 import { HttpStatus } from '@nestjs/common/enums';
 import { AuthService } from 'src/services/auth.service';
+import { Public } from 'src/decorators/public.decorator';
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {
     this.authService = authService;
   }
+  @Public()
   @Post('login')
   async login(
     @Body() loginDto: LoginDto,
@@ -24,6 +26,7 @@ export class AuthController {
       throw new BadRequestException();
     }
   }
+  @Public()
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
     try {

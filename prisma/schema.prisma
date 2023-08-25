@@ -15,6 +15,7 @@ model Category {
   childCategories Category[] @relation("ParentCategory")
   features        Feature[]
   banner          String
+  articles Article[]
 }
 
 model User {
@@ -36,7 +37,11 @@ model Article {
   quantity Int
   cartItem        CartItem[]
   photos ArticlePhoto[]
+  price Price[]
   producerId      Int
+  categoryId Int
+  isSelling Boolean @default(true)
+  category Category @relation(fields: [categoryId],references: [id])
   articleFeatures ArticleFeature[]
 }
 model Order {
@@ -49,7 +54,9 @@ model ArticlePhoto {
   id Int @id @default(autoincrement())
   articleId Int 
   article Article @relation(fields: [articleId],references: [id])
+  url String
   type ArticlePhotoType
+  @@unique([url,articleId])
 }
 enum ArticlePhotoType {
   MAIN
@@ -73,7 +80,9 @@ model Producer {
 
 model Price {
   id      Int      @id @default(autoincrement())
-  value Float 
+  articleId Int
+  article Article @relation(fields: [articleId],references: [id])
+  value   Float 
   addedAt DateTime @default(now())
 }
 
@@ -83,6 +92,7 @@ model Feature {
   categoryId      Int
   category        Category         @relation(fields: [categoryId], references: [id])
   articleFeatures ArticleFeature[]
+  @@unique([categoryId,name])
 }
 
 model CartItem {
@@ -92,6 +102,7 @@ model CartItem {
   quantity  Int
   articleId Int
   article   Article @relation(fields: [articleId], references: [id])
+  @@unique([cartId,articleId])
 }
 
 model Cart {
@@ -101,6 +112,7 @@ model Cart {
   status CartStatus
   order Order[]
   cartItems CartItem[]
+  @@unique([userId,status])
 }
 
 enum CartStatus {
@@ -116,4 +128,5 @@ model ArticleFeature {
   value     String
   article   Article @relation(fields: [articleId], references: [id])
   feature   Feature @relation(fields: [featureId], references: [id])
+  @@unique([articleId,featureId])
 }
