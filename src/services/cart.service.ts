@@ -3,6 +3,7 @@ import { User } from '@prisma/client';
 import { PrismaService } from './prisma.service';
 import { AddItemDto } from 'src/data/cart/addItem.dto';
 import { ArticleService } from './article.service';
+import { ArticleNotFoundException } from 'src/exceptions/article/articleNotFound.exception';
 @Injectable()
 export class CartService {
   constructor(
@@ -22,7 +23,7 @@ export class CartService {
   }
   async setItem(item: AddItemDto, user: User) {
     const article = await this.articleService.findItemById(item.articleId);
-    if (!article) throw new Error('Article not found');
+    if (!article) throw new ArticleNotFoundException();
     const cart = await this.getUserCart(user);
     const cartItem = cart.cartItems.find((item) => item.articleId === item.id);
     if (!cartItem) {

@@ -17,11 +17,11 @@ import { AddItemDto } from 'src/data/cart/addItem.dto';
 @UseGuards(AuthGuard)
 export class CartController {
   constructor(private cartService: CartService) {}
-  @Get('cartData')
+  @Get('cartdata')
   async getUserCart(@Client() user: User) {
     return await this.cartService.getUserCart(user);
   }
-  @Post('setItem')
+  @Post('setitem')
   async setItem(@Body() item: AddItemDto, @Client() user: User) {
     try {
       return await this.cartService.setItem(item, user);
@@ -29,7 +29,7 @@ export class CartController {
       throw new BadRequestException('An error has occured');
     }
   }
-  @Delete('removeItem/:id')
+  @Delete('removeitem/:id')
   async removeItem(@Param('id') id: number, @Client() user: User) {
     if (isNaN(+id)) throw new BadRequestException('Not a valid article id');
     return await this.cartService.removeItem(+id, user);

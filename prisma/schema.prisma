@@ -127,6 +127,6 @@ model ArticleFeature {
   featureId Int
   value     String
   article   Article @relation(fields: [articleId], references: [id])
-  feature   Feature @relation(fields: [featureId], references: [id])
+  feature   Feature @relation(fields: [featureId], references: [id],onDelete: Cascade)
   @@unique([articleId,featureId])
 }

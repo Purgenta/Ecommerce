@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { PrismaService } from './prisma.service';
+import { ArticleNotFoundException } from 'src/exceptions/article/articleNotFound.exception';
 
 @Injectable()
 export class PriceService {
@@ -10,7 +11,7 @@ export class PriceService {
   ) {}
   async addPrice(articleId: number, price: number) {
     const article = await this.articleService.findItemById(articleId);
-    if (!article) throw new Error("Article doesn't exist");
+    if (!article) throw new ArticleNotFoundException();
     return await this.prismaService.price.create({
       data: { value: price, addedAt: new Date(), articleId },
     });

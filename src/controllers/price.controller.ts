@@ -8,7 +8,7 @@ import { PriceService } from 'src/services/price.service';
 export class PriceController {
   constructor(private priceService: PriceService) {}
   @Roles('ADMIN')
-  @Post('addPrice')
+  @Post('addprice')
   async addProductPrice(@Body() price: PriceDto) {
     try {
       return await this.priceService.addPrice(price.articleId, price.value);
@@ -17,7 +17,7 @@ export class PriceController {
     }
   }
   @Roles('ADMIN')
-  @Delete('deletePrice/:id')
+  @Delete('deleteprice/:id')
   async deleteProductPrice(@Param('id') id: number) {
     try {
       return await this.priceService.deletePrice(id);
