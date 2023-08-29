@@ -5,6 +5,12 @@ import { UniqueCategoryException } from 'src/exceptions/category/uniqueCategory.
 @Injectable()
 export class CategoryService {
   constructor(private prismaService: PrismaService) {}
+  async findByCategory(id: number) {
+    return await this.prismaService.category.findMany({
+      where: { id },
+      select: { id: true, articles: true },
+    });
+  }
   async findById(id: number) {
     return await this.prismaService.category.findFirstOrThrow({
       where: { id },

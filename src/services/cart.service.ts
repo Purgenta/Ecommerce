@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from './prisma.service';
 import { AddItemDto } from 'src/data/cart/addItem.dto';
+import { Cart } from '@prisma/client';
 import { ArticleService } from './article.service';
 import { ArticleNotFoundException } from 'src/exceptions/article/articleNotFound.exception';
 @Injectable()
@@ -48,6 +49,12 @@ export class CartService {
         },
         cart: { status: { equals: 'ONGOING' }, userId: user.id },
       },
+    });
+  }
+  async issueCartForOrder(cart: Cart) {
+    return await this.prismaService.cart.update({
+      where: { id: cart.id },
+      data: { status: 'PROCESSING' },
     });
   }
 }

@@ -5,12 +5,14 @@ import { PrismaModule } from './prisma.module';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { RoleGuard } from 'src/guards/role.guard';
+import { CategoryFeatureService } from 'src/services/categoryFeature.service';
 @Module({
   controllers: [CategoryController],
   imports: [PrismaModule],
-  exports: [CategoryService],
+  exports: [CategoryService, CategoryFeatureService],
   providers: [
     CategoryService,
+    CategoryFeatureService,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
