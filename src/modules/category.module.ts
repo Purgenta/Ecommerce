@@ -6,6 +6,7 @@ import { AuthGuard } from 'src/guards/auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { RoleGuard } from 'src/guards/role.guard';
 import { CategoryFeatureService } from 'src/services/categoryFeature.service';
+
 @Module({
   controllers: [CategoryController],
   imports: [PrismaModule],

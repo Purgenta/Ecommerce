@@ -12,5 +12,16 @@ export class OrderService {
     const cart = await this.cartService.getUserCart(user);
     if (!cart.cartItems.length)
       throw new Error("Cart doesn't contain any items");
+    return await this.cartService.issueCartForOrder(cart);
+  }
+  async findById(id: number) {
+    return await this.prismaService.order.findUniqueOrThrow({
+      where: { id },
+      include: {
+        cart: {
+          include: { cartItems: { include: { article: true } }, user: true },
+        },
+      },
+    });
   }
 }

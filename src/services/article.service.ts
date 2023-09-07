@@ -4,6 +4,7 @@ import { ArticleDto } from 'src/data/article/article.dto';
 import { CategoryService } from './category.service';
 import { CategoryFeatureService } from './categoryFeature.service';
 import { ProducerService } from './producer.service';
+import { ArticleFilterDto } from 'src/data/article/article.filter.dto';
 @Injectable()
 export class ArticleService {
   constructor(
@@ -56,6 +57,33 @@ export class ArticleService {
     return await this.prismaService.article.update({
       where: { id },
       data: { isSelling: false },
+    });
+  }
+  async filterArticles(article: ArticleFilterDto) {
+    console.log(article);
+    const values = article.features
+      ? article.features.map((val) => val.values).flat()
+      : undefined;
+    return await this.prismaService.article.findMany({
+      where: {
+        category: {
+          name: article.categoryName,
+        },
+        isSelling: true,
+        name: article.name,
+        articleFeatures: !article.features
+          ? undefined
+          : {
+              every: {
+                featureId: { in: article.features.map((val) => val.featureId) },
+                value: { in: values },
+              },
+            },
+      },
+      distinct: 'id',
+      skip: article.page * article.size,
+      take: article.size,
+      include: { photos: true, producer: true, price: true },
     });
   }
 }

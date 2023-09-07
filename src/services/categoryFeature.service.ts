@@ -9,6 +9,28 @@ export class CategoryFeatureService {
     private prismaService: PrismaService,
     private categoryService: CategoryService,
   ) {}
+  async getCategoryFeatureValues(name: string) {
+    const category = await this.categoryService.findByName(name);
+    const features = await this.prismaService.articleFeature.findMany({
+      where: { article: { categoryId: { equals: category.id } } },
+      include: { feature: true },
+    });
+    const values = new Map<string, { values: Set<string>; id: number }>();
+    features.forEach((feature) => {
+      const name = feature.feature.name;
+      if (values.has(name)) values.get(name).values.add(feature.value);
+      else
+        values.set(name, {
+          values: new Set([feature.value]),
+          id: feature.feature.id,
+        });
+    });
+    const featureValues: { name: string; id: number; values: string[] }[] = [];
+    for (const [key, value] of values) {
+      featureValues.push({ ...value, values: [...value.values], name: key });
+    }
+    return featureValues;
+  }
   async addFeature(feature: FeatureDto) {
     const category = await this.categoryService.findById(feature.categoryId);
     const parentFeatures = await this.getParentFeatures(category.id);
@@ -25,10 +47,10 @@ export class CategoryFeatureService {
       throw new UniqueFeatureException(existingFeature.categoryName);
     return await this.createNewFeature(feature.categoryId, feature.name);
   }
-  async deleteFeature(feature: FeatureDto) {
-    await this.categoryService.findById(feature.categoryId);
+  async deleteFeature(id: number) {
+    await this.categoryService.findById(id);
     return await this.prismaService.feature.deleteMany({
-      where: { categoryId: feature.categoryId, name: feature.name },
+      where: { id },
     });
   }
   async getCategoryFeatures(categoryId: number) {
