@@ -15,9 +15,16 @@ model Category {
   childCategories Category[] @relation("ParentCategory")
   features        Feature[]
   banner          String
+  discount CategoryDiscount?
   articles Article[]
 }
-
+model WishList {
+  user User @relation(fields: [userId],references: [id])
+  userId Int 
+  article Article @relation(fields: [articleId],references: [id])
+  articleId Int
+  @@unique([userId,articleId])
+}
 model User {
   id          Int    @id @default(autoincrement())
   firstName   String
@@ -26,6 +33,7 @@ model User {
   email       String @unique
   phoneNumber String @unique
   carts       Cart[]
+  wishList WishList[]
   role Role
 }
 
@@ -40,6 +48,9 @@ model Article {
   price Price[]
   producerId      Int
   categoryId Int
+  flair ArticleFlair?
+  discount Discount ?
+  wishList WishList[]
   isSelling Boolean @default(true)
   category Category @relation(fields: [categoryId],references: [id])
   articleFeatures ArticleFeature[]
@@ -84,8 +95,26 @@ model Price {
   article Article @relation(fields: [articleId],references: [id])
   value   Float 
   addedAt DateTime @default(now())
+  type PriceType @default(ECOMMERCE)
+  @@unique([articleId,type])
 }
-
+enum PriceType {
+  RETAIL
+  ECOMMERCE
+}
+model ArticleFlair {
+  id Int @id @default(autoincrement())
+  flairId Int 
+  articleId Int @unique
+  article Article @relation(fields: [articleId],references: [id])
+  flair Flair @relation(fields: [flairId],references: [id])
+}
+model Flair {
+  id Int @id @default(autoincrement())
+  color String @unique
+  name String @unique
+  flairs ArticleFlair[]
+}
 model Feature {
   id              Int              @id @default(autoincrement())
   name            String
@@ -93,6 +122,18 @@ model Feature {
   category        Category         @relation(fields: [categoryId], references: [id])
   articleFeatures ArticleFeature[]
   @@unique([categoryId,name])
+}
+model Discount {
+  id Int 
+  amount Int 
+  articleId Int @unique
+  article Article @relation(fields: [articleId],references: [id])
+}
+model CategoryDiscount {
+  id Int 
+  amount Int 
+  categoryId Int @unique
+  category Category @relation(fields: [categoryId],references: [id])
 }
 
 model CartItem {

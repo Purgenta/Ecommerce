@@ -60,11 +60,10 @@ export class ArticleService {
     });
   }
   async filterArticles(article: ArticleFilterDto) {
-    console.log(article);
     const values = article.features
       ? article.features.map((val) => val.values).flat()
       : undefined;
-    return await this.prismaService.article.findMany({
+    const articleCount = await this.prismaService.article.count({
       where: {
         category: {
           name: article.categoryName,
@@ -74,8 +73,29 @@ export class ArticleService {
         articleFeatures: !article.features
           ? undefined
           : {
-              every: {
-                featureId: { in: article.features.map((val) => val.featureId) },
+              some: {
+                featureId: {
+                  in: article.features.map((feature) => feature.id),
+                },
+                value: { in: values },
+              },
+            },
+      },
+    });
+    const articles = await this.prismaService.article.findMany({
+      where: {
+        category: {
+          name: article.categoryName,
+        },
+        isSelling: true,
+        name: article.name,
+        articleFeatures: !article.features
+          ? undefined
+          : {
+              some: {
+                featureId: {
+                  in: article.features.map((feature) => feature.id),
+                },
                 value: { in: values },
               },
             },
@@ -83,7 +103,15 @@ export class ArticleService {
       distinct: 'id',
       skip: article.page * article.size,
       take: article.size,
-      include: { photos: true, producer: true, price: true },
+      include: {
+        photos: true,
+        producer: true,
+        price: true,
+        articleFeatures: true,
+        flair: true,
+        category: { select: { discount: true } },
+      },
     });
+    return { articles: articles, articleCount };
   }
 }

@@ -1,13 +1,5 @@
 import { Controller } from '@nestjs/common/decorators';
-import {
-  Post,
-  Get,
-  Delete,
-  Body,
-  Param,
-  Query,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Post, Get, Delete, Body, Param } from '@nestjs/common';
 import {
   BadRequestException,
   InternalServerErrorException,
@@ -29,18 +21,9 @@ export class ArticleController {
       throw new InternalServerErrorException();
     }
   }
-  @Get('filterproducts')
+  @Post('filterproducts')
   @Public()
-  async filterProducts(
-    @Query(
-      new ValidationPipe({
-        transform: true,
-        transformOptions: { enableImplicitConversion: true },
-        forbidNonWhitelisted: true,
-      }),
-    )
-    article: ArticleFilterDto,
-  ) {
+  async filterProducts(@Body() article: ArticleFilterDto) {
     return await this.articleService.filterArticles(article);
   }
   @Get('find/:id')

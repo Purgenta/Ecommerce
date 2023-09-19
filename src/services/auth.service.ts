@@ -38,6 +38,17 @@ export class AuthService {
   async login(loginParams: LoginDto) {
     const user = await this.prismaService.user.findFirst({
       where: { email: loginParams.email },
+      include: {
+        wishList: true,
+        carts: {
+          where: {
+            status: 'ONGOING',
+          },
+          include: {
+            cartItems: true,
+          },
+        },
+      },
     });
     if (!user) throw new Error('Invalid login credentials');
     const samePassword = await bcrypt.compare(
@@ -53,7 +64,7 @@ export class AuthService {
     return {
       refreshToken,
       token,
-      role: user.role,
+      user,
     };
   }
   async refreshToken(token: string) {

@@ -7,9 +7,13 @@ import { BadRequestException, HttpException } from '@nestjs/common/exceptions';
 import { HttpStatus } from '@nestjs/common/enums';
 import { AuthService } from 'src/services/auth.service';
 import { Public } from 'src/decorators/public.decorator';
+import { CartService } from 'src/services/cart.service';
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {
+  constructor(
+    private authService: AuthService,
+    private cartService: CartService,
+  ) {
     this.authService = authService;
   }
   @Public()
@@ -19,9 +23,17 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     try {
-      const data = await this.authService.login(loginDto);
-      response.cookie('refreshToken', data.refreshToken);
-      return { token: data.token, role: data.role };
+      const { refreshToken, token, user } =
+        await this.authService.login(loginDto);
+      const cart = await this.cartService.getUserCart(user);
+      response.cookie('refreshToken', refreshToken);
+      return {
+        token,
+        role: user.role,
+        email: user.email,
+        cart,
+        wishList: user.wishList,
+      };
     } catch (error) {
       throw new BadRequestException();
     }

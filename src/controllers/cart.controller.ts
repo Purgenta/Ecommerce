@@ -5,6 +5,7 @@ import {
   Body,
   Post,
   Delete,
+  Put,
   Param,
   BadRequestException,
 } from '@nestjs/common';
@@ -21,12 +22,20 @@ export class CartController {
   async getUserCart(@Client() user: User) {
     return await this.cartService.getUserCart(user);
   }
-  @Post('setitem')
+  @Put('setitem')
   async setItem(@Body() item: AddItemDto, @Client() user: User) {
     try {
       return await this.cartService.setItem(item, user);
     } catch (error) {
       throw new BadRequestException('An error has occured');
+    }
+  }
+  @Post('additem')
+  async addCartItem(@Body() item: AddItemDto, @Client() user: User) {
+    try {
+      return await this.cartService.addItem(item, user);
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
   }
   @Delete('removeitem/:id')

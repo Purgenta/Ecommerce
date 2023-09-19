@@ -10,7 +10,7 @@ import {
 import { Type } from 'class-transformer';
 class Feature {
   @IsNumber()
-  featureId: number;
+  id: number;
   @IsArray()
   values: string[];
 }
@@ -42,4 +42,6 @@ export class ArticleFilterDto {
   @ValidateNested({ each: true })
   @Type(() => Feature)
   features: Feature[];
+  orderBy: 'price' | 'name';
+  orderDirection: 'asc' | 'desc';
 }
