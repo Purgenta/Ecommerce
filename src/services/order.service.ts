@@ -14,6 +14,7 @@ export class OrderService {
       throw new Error("Cart doesn't contain any items");
     return await this.cartService.issueCartForOrder(cart);
   }
+  async anotherMethodAdded() {}
   async findById(id: number) {
     return await this.prismaService.order.findUniqueOrThrow({
       where: { id },
