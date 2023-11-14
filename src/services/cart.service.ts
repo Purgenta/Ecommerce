@@ -66,21 +66,21 @@ export class CartService {
     const article = await this.articleService.findItemById(item.articleId);
     if (!article) throw new ArticleNotFoundException();
     const cart = await this.getUserCart(user);
-    const cartItem = await this.prismaService.cartItem.findFirst({
-      where: { cartId: cart.id, articleId: item.articleId },
-    });
-    if (cartItem)
-      return await this.prismaService.cartItem.update({
+    const cartItem = cart.cartItems.find(
+      (item) => item.articleId === article.id,
+    );
+    if (cartItem) {
+      await this.prismaService.cartItem.update({
         where: { id: cartItem.id },
         data: { quantity: item.quantity },
       });
-    return await this.prismaService.cartItem.create({
-      data: {
+      return {
+        article,
+        id: cartItem.id,
         quantity: item.quantity,
         articleId: article.id,
-        cartId: cart.id,
-      },
-    });
+      };
+    } else throw Error('No such cart item exists');
   }
   async removeItem(item: number, user: User) {
     return await this.prismaService.cartItem.deleteMany({

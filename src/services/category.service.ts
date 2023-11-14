@@ -62,6 +62,7 @@ export class CategoryService {
     const categories = await this.prismaService.category.findMany({
       orderBy: { id: 'asc' },
     });
+    console.log(categories);
     const lookup = new Map<number, Hierarchy>();
     categories.forEach((category) =>
       lookup.set(category.id, {

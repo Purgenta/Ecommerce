@@ -1,9 +1,14 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, Req } from '@nestjs/common';
 import { LoginDto } from 'src/data/auth/login.dto';
 import { RegisterDto } from 'src/data/auth/register.dto';
 import { Response } from 'express';
+import { Request } from 'express';
 import { Res } from '@nestjs/common/decorators';
-import { BadRequestException, HttpException } from '@nestjs/common/exceptions';
+import {
+  BadRequestException,
+  HttpException,
+  UnauthorizedException,
+} from '@nestjs/common/exceptions';
 import { HttpStatus } from '@nestjs/common/enums';
 import { AuthService } from 'src/services/auth.service';
 import { Public } from 'src/decorators/public.decorator';
@@ -26,7 +31,11 @@ export class AuthController {
       const { refreshToken, token, user } =
         await this.authService.login(loginDto);
       const cart = await this.cartService.getUserCart(user);
-      response.cookie('refreshToken', refreshToken);
+      response.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+      });
       return {
         token,
         role: user.role,
@@ -45,6 +54,17 @@ export class AuthController {
       await this.authService.register(registerDto);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+  @Public()
+  @Get('refreshtoken')
+  async refreshToken(@Req() request: Request) {
+    try {
+      const token = request.cookies['refreshToken'];
+      if (!token) throw new Error();
+      return await this.authService.refreshToken(token);
+    } catch (error) {
+      throw new UnauthorizedException();
     }
   }
 }

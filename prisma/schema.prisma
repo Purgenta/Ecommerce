@@ -171,3 +171,9 @@ model ArticleFeature {
   feature   Feature @relation(fields: [featureId], references: [id],onDelete: Cascade)
   @@unique([articleId,featureId])
 }
+model RefreshToken {
+  id Int @id @default(autoincrement())
+  token String
+  isRevoked Boolean
+
+}

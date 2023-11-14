@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { LoginDto } from 'src/data/auth/login.dto';
 import { RegisterDto } from 'src/data/auth/register.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -61,6 +61,9 @@ export class AuthService {
     const refreshToken = await this.jwtService.signAsync(payload, {
       expiresIn: '3 days',
     });
+    await this.prismaService.refreshToken.create({
+      data: { isRevoked: false, token: refreshToken },
+    });
     return {
       refreshToken,
       token,
@@ -68,6 +71,23 @@ export class AuthService {
     };
   }
   async refreshToken(token: string) {
-    return token;
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: process.env.JWT_SECRET,
+      });
+      const userToken = await this.prismaService.refreshToken.findFirst({
+        where: { token, isRevoked: false },
+      });
+      if (!userToken) throw new Error();
+      const user = await this.prismaService.user.findFirst({
+        where: { email: payload.email },
+      });
+      const jwtToken = await this.jwtService.signAsync({
+        email: payload.email,
+      });
+      return { token: jwtToken, role: user.role, email: payload.email };
+    } catch (error) {
+      throw new UnauthorizedException();
+    }
   }
 }
