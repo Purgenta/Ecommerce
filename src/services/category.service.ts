@@ -17,6 +17,9 @@ export class CategoryService {
       select: { id: true, articles: true },
     });
   }
+  async someMethodAdded() {
+    console.log('Seeing that a method was addded');
+  }
   async findById(id: number) {
     const category = await this.prismaService.category.findFirstOrThrow({
       where: { id },
